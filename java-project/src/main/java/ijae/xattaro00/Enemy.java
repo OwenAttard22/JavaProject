@@ -1,12 +1,13 @@
 package ijae.xattaro00;
 
-public class Enemy extends BoardObject {
+public class Enemy extends Character {
     public Enemy(int x, int y) {
         super(x, y, Type.ENEMY);
     }
 
-    public void moveRandomly() {
-        // Implement random movement logic for the enemy
+    @Override
+    public void validateMove(Move move) {
+        
     }
 
     @Override

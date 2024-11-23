@@ -1,11 +1,12 @@
 package ijae.xattaro00;
 
-public class Player extends BoardObject {
+public class Player extends Character {
     public Player(int x, int y) {
         super(x, y, Type.PLAYER);
     }
 
-    public void move(Move move) {
+    @Override
+    public void validateMove(Move move) {
         // Implement movement logic for the player
     }
 
