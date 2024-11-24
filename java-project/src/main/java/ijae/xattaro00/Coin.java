@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-public class Coin extends BoardObject {
+import java.io.Serializable;
+
+public class Coin extends BoardObject implements Serializable {
+    private static final long serialVersionUID = 1L;
     public Coin(int x, int y) {
         super(x, y, Type.COIN);
     }

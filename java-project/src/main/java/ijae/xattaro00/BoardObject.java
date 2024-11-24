@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-public abstract class BoardObject{
+import java.io.Serializable;
+
+public abstract class BoardObject implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected int x, y;
     protected Type type;
 

@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-public class Player extends Character {
+import java.io.Serializable;
+
+public class Player extends Character implements Serializable {
+    private static final long serialVersionUID = 1L;
     public Player(int x, int y) {
         super(x, y, Type.PLAYER);
     }

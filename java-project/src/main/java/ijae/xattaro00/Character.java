@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-abstract class Character extends BoardObject{
+import java.io.Serializable;
+
+abstract class Character extends BoardObject implements Serializable {
+    private static final long serialVersionUID = 1L;
 	public Character(int x, int y, Type type) {
 		super(x, y, type);
 	}
@@ -22,19 +25,19 @@ abstract class Character extends BoardObject{
         }
     }
 
-    protected void moveUp(){
+    protected void moveLeft(){
         y--;
     }
 
-    protected void moveDown(){
+    protected void moveRight(){
         y++;
     }
 
-    protected void moveLeft(){
+    protected void moveUp(){
         x--;
     }
 
-    protected void moveRight(){
+    protected void moveDown(){
         x++;
     }
 

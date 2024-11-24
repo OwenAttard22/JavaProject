@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-public class Enemy extends Character {
+import java.io.Serializable;
+
+public class Enemy extends Character implements Serializable {
+    private static final long serialVersionUID = 1L;
     public Enemy(int x, int y) {
         super(x, y, Type.ENEMY);
     }

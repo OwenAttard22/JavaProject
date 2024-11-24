@@ -5,4 +5,6 @@ public enum Type {
     COIN,
     PLAYER,
     ENEMY,
+    GATE,
+    KEY,
 }

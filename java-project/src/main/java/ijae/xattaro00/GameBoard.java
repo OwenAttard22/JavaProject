@@ -1,6 +1,9 @@
 package ijae.xattaro00;
 
-public class GameBoard {
+import java.io.Serializable;
+
+public class GameBoard implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final int SIZE = 10; // Fixed board size
     private final BoardObject[][] board;
 
@@ -42,7 +45,7 @@ public class GameBoard {
         }
     }
 
-    private boolean isWithinBounds(int x, int y) {
+    public boolean isWithinBounds(int x, int y) {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE;
     }
 
@@ -54,6 +57,21 @@ public class GameBoard {
                 } else {
                     System.out.print(board[i][j].toString() + " ");
                 }
+            }
+            System.out.println();
+        }
+    }
+
+    public void displayBoardWithNumbers() {
+        int cellnum = 0;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (board[i][j] == null) {
+                    System.out.print(String.format("%-3d", cellnum));
+                } else {
+                    System.out.print(" " + board[i][j].toString() + " ");
+                }
+                cellnum++;
             }
             System.out.println();
         }
