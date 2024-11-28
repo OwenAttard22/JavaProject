@@ -12,10 +12,10 @@ import java.util.List;
 public class Level implements Serializable {
     private static final long serialVersionUID = 1L;
     private final GameBoard board;
-    private Player player;
-    private Gate gate;
-    private Key key;
-    private final List<Enemy> enemies;
+    public Player player;
+    public Gate gate;
+    public Key key;
+    public final List<Enemy> enemies;
 
     public Level() {
         this.board = new GameBoard();
@@ -27,33 +27,41 @@ public class Level implements Serializable {
     }
 
     public boolean placePlayer(int x, int y) {
-        if (board.getObject(x, y) == null) {
-            if (player != null) {
-                // Move existing player to the new position
-                board.removeObject(player.getX(), player.getY());
-                player.setX(x);
-                player.setY(y);
-            } else {
-                // Create a new player
-                player = new Player(x, y);
-            }
-            board.placeObject(player);
-            return true;
-        } else {
-            System.err.println("Position (" + x + ", " + y + ") is already occupied!");
+        if (!board.isWithinBounds(x, y)) {
+            System.err.println("Position (" + x + ", " + y + ") is out of bounds!");
             return false;
         }
-    }
+    
+        BoardObject existingObject = board.getObjectAt(x, y);
+        if (existingObject instanceof Wall) {
+            System.err.println("Cannot place a player on a wall at (" + x + ", " + y + ").");
+            return false;
+        }
+    
+        if (player != null) {
+            // Move existing player
+            board.removeObject(player);
+            player.setX(x);
+            player.setY(y);
+        } else {
+            // Create a new player
+            player = new Player(x, y);
+        }
+    
+        board.placeObject(player);
+        return true;
+    }    
 
     public boolean placeGate(int x, int y) {
-        if (board.getObject(x, y) == null) {
+        if (board.getObjectAt(x, y) == null) {
             if (gate != null) {
-                // Move existing gate to the new position
-                board.removeObject(gate.getX(), gate.getY());
+                BoardObject obj = board.getObjectAt(gate.getX(), gate.getY());
+                if (obj != null) {
+                    board.removeObject(obj);
+                }
                 gate.setX(x);
                 gate.setY(y);
             } else {
-                // Create a new gate
                 gate = new Gate(x, y);
             }
             board.placeObject(gate);
@@ -65,10 +73,13 @@ public class Level implements Serializable {
     }
 
     public boolean placeKey(int x, int y) {
-        if (board.getObject(x, y) == null) {
+        if (board.getObjectAt(x, y) == null) {
             if (key != null) {
                 // Move existing key to the new position
-                board.removeObject(key.getX(), key.getY());
+                BoardObject obj = board.getObjectAt(gate.getX(), gate.getY());
+                if (obj != null) {
+                    board.removeObject(obj);
+                }
                 key.setX(x);
                 key.setY(y);
             } else {
@@ -88,7 +99,7 @@ public class Level implements Serializable {
             System.err.println("Maximum number of enemies reached! Only up to 3 enemies are allowed.");
             return 1; // Error code for too many enemies
         }
-        if (board.getObject(x, y) == null) {
+        if (board.getObjectAt(x, y) == null) {
             Enemy enemy = new Enemy(x, y);
             enemies.add(enemy);
             board.placeObject(enemy);
@@ -100,8 +111,18 @@ public class Level implements Serializable {
     }
 
     public boolean placeWall(int x, int y) {
-        if (board.getObject(x, y) == null) {
+        if (board.getObjectAt(x, y) == null) {
             board.placeObject(new Wall(x, y));
+            return true;
+        } else {
+            System.err.println("Position (" + x + ", " + y + ") is already occupied!");
+            return false;
+        }
+    }
+
+    public boolean placeCoin(int x, int y) {
+        if (board.getObjectAt(x, y) == null) {
+            board.placeObject(new Coin(x, y));
             return true;
         } else {
             System.err.println("Position (" + x + ", " + y + ") is already occupied!");
@@ -144,7 +165,36 @@ public class Level implements Serializable {
 
     public static Level loadLevelFromFile(String filename) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename))) {
-            return (Level) in.readObject();
+            Level loadedLevel = (Level) in.readObject();
+    
+            // Reinitialize player, gate, key, and enemies
+            loadedLevel.player = null; // Reset player to avoid duplicates
+            loadedLevel.gate = null;
+            loadedLevel.key = null;
+            loadedLevel.enemies.clear();
+    
+            for (BoardObject obj : loadedLevel.getBoard().getBoardObjects()) {
+                if (obj instanceof Player) {
+                    loadedLevel.player = (Player) obj;
+                    // System.out.println("Player found at: (" + obj.getX() + ", " + obj.getY() + ")");
+                } else if (obj instanceof Gate) {
+                    loadedLevel.gate = (Gate) obj;
+                    // System.out.println("Gate found at: (" + obj.getX() + ", " + obj.getY() + ")");
+                } else if (obj instanceof Key) {
+                    loadedLevel.key = (Key) obj;
+                    // System.out.println("Key found at: (" + obj.getX() + ", " + obj.getY() + ")");
+                } else if (obj instanceof Enemy) {
+                    loadedLevel.enemies.add((Enemy) obj);
+                    // System.out.println("Enemy found at: (" + obj.getX() + ", " + obj.getY() + ")");
+                }
+            }
+    
+            // Ensure player is initialized
+            if (loadedLevel.player == null) {
+                throw new IllegalStateException("No player found in the loaded level!");
+            }
+    
+            return loadedLevel;
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error loading level: " + e.getMessage());
             return null;

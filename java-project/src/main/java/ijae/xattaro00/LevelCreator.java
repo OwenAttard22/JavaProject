@@ -12,7 +12,7 @@ public class LevelCreator {
         System.out.println("Follow the instructions to place objects on the board.");
 
         boolean creating = true;
-        while (creating) { // CLI menu for creating level
+        do { // CLI menu for creating level
             level.getBoard().displayBoardWithNumbers();
             System.out.println("\nSelect an option:");
             System.out.println("1. Place Player");
@@ -20,10 +20,12 @@ public class LevelCreator {
             System.out.println("3. Place Key");
             System.out.println("4. Place Enemy");
             System.out.println("5. Place Wall");
-            System.out.println("6. Display Board");
+            System.out.println("6. Place Coins");
             System.out.println("7. Validate Level");
             System.out.println("8. Quit");
+            System.out.print("9. Save Level\n");
 
+            if (scanner.hasNextInt()) {
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1:
@@ -42,7 +44,7 @@ public class LevelCreator {
                     placeObject(level, scanner, "wall");
                     break;
                 case 6:
-                    level.getBoard().displayBoard();
+                    placeObject(level, scanner, "coin");
                     break;
                 case 7:
                     if (level.isValidLevel()) {
@@ -59,22 +61,54 @@ public class LevelCreator {
                     creating = false;
                     System.out.println("Exiting Level Creator. Goodbye!");
                     break;
+                case 9:
+                    System.out.println("Enter the filename to save the level:");
+                    String filename = scanner.next();
+                    filename += ".dat"; // file validity check
+                    level.saveLevelToFile(filename);
+                    System.out.println("Level saved to " + filename + ".dat");
+                    break;
                 default:
                     System.out.println("Invalid choice. Please select a valid option.");
             }
-        }
+            } else {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.next();
+            }
+        } while (creating);
         scanner.close();
     }
 
     private static void placeObject(Level level, Scanner scanner, String objectType) {
-        System.out.println("Enter the cell number to place the " + objectType + ":");
-        int cellNumber = scanner.nextInt();
+        int cellNumber = -1;
+        boolean validInput = false;
+    
+        while (!validInput) {
+            try {
+                System.out.println("Enter the cell number to place the " + objectType + " (valid range: 0 to 99):");
+                if (scanner.hasNextInt()) {
+                    cellNumber = scanner.nextInt();
+                    if (cellNumber >= 0 && cellNumber <= 99) {
+                        validInput = true; // Input is valid
+                    } else {
+                        System.out.println("Invalid input! Please enter a number between 0 and 99.");
+                    }
+                } else {
+                    System.out.println("Invalid input! Please enter a valid integer.");
+                    scanner.next(); // Clear the invalid input
+                }
+            } catch (Exception e) {
+                System.out.println("An error occurred while reading input. Please try again.");
+                scanner.next(); // Clear the invalid input
+            }
+        }
+    
         // Convert cell number to x, y coordinates
         int x = cellNumber / 10;
         int y = cellNumber % 10;
-
+    
         boolean placed = false;
-        switch (objectType) {
+        switch (objectType.toLowerCase()) {
             case "player":
                 placed = level.placePlayer(x, y);
                 break;
@@ -97,8 +131,14 @@ public class LevelCreator {
             case "wall":
                 placed = level.placeWall(x, y);
                 break;
+            case "coin":
+                placed = level.placeCoin(x, y);
+                break;
+            default: // just in case, invalid object exit
+                System.out.println("Invalid object type: " + objectType);
+                return;
         }
-
+    
         if (placed) {
             System.out.println(objectType + " placed successfully at (" + x + ", " + y + ").");
         } else {
