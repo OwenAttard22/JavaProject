@@ -1,48 +1,94 @@
 package ijae.xattaro00;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameBoard implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final int SIZE = 10; // Fixed board size
-    private final BoardObject[][] board;
+    private final List<BoardObject> boardObjects;
 
     public GameBoard() {
-        this.board = new BoardObject[SIZE][SIZE];
-        initializeBoard();
+        this.boardObjects = new ArrayList<>();
+        initialiseBoard();
     }
 
-    public BoardObject getObject(int x, int y) {
-        return board[x][y];
-    }
-
-    public void placeObject(BoardObject obj) {
-        if (isWithinBounds(obj.getX(), obj.getY())) {
-            board[obj.getX()][obj.getY()] = obj;
-        } else {
-            throw new IllegalArgumentException("Position out of bounds: (" + obj.getX() + ", " + obj.getY() + ")");
-        }
-    }
-
-    public void removeObject(int x, int y) {
-        if (isWithinBounds(x, y)) {
-            board[x][y] = null;
-        } else {
-            throw new IllegalArgumentException("Position out of bounds: (" + x + ", " + y + ")");
-        }
-    }
-
-    // Initialize the board with outer borders set to Wall
-    private void initializeBoard() {
+    public void initialiseBoard() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
+                // Place walls at the borders
                 if (i == 0 || i == SIZE - 1 || j == 0 || j == SIZE - 1) {
-                    board[i][j] = new Wall(i, j); // Set border cells to Wall
-                } else {
-                    board[i][j] = null; // Inner cells are initially empty
+                    boardObjects.add(new Wall(i, j));
                 }
             }
         }
+    }
+
+    public List<BoardObject> getBoardObjects() {
+        return boardObjects;
+    }
+
+    public void placeObject(BoardObject obj) {
+        if (!isWithinBounds(obj.getX(), obj.getY())) {
+            throw new IllegalArgumentException("Position out of bounds: (" + obj.getX() + ", " + obj.getY() + ")");
+        }
+
+        // Check for conflicts with existing objects
+        BoardObject existingObject = getObjectAt(obj.getX(), obj.getY());
+        if (existingObject instanceof Wall) {
+            throw new IllegalArgumentException("Cannot place an object on a wall at (" + obj.getX() + ", " + obj.getY() + ")");
+        }
+
+        if (existingObject != null && !(obj instanceof Player || obj instanceof Enemy)) {
+            throw new IllegalArgumentException("Position already occupied by another object at (" + obj.getX() + ", " + obj.getY() + ")");
+        }
+
+        boardObjects.add(obj);
+    }
+
+    public void removeObject(BoardObject obj) {
+        if (obj instanceof Player) {
+            System.err.println("WARNING: Removing player from the board!");
+        }
+
+        if (boardObjects.contains(obj)) {
+            boardObjects.remove(obj);
+        } else {
+            System.err.println("Attempted to remove an object that doesn't exist: " + obj);
+        }
+    }
+
+    public void removeObject(int x, int y, BoardObject obj) {
+        if (!isWithinBounds(x, y)) {
+            throw new IllegalArgumentException("Position out of bounds: (" + x + ", " + y + ")");
+        }
+
+        if (boardObjects.contains(obj) && obj.getX() == x && obj.getY() == y) {
+            boardObjects.remove(obj);
+        } else {
+            System.err.println("Attempted to remove an object that doesn't exist at position: (" + x + ", " + y + ")");
+        }
+    }
+
+    public BoardObject getObjectAt(int x, int y) {
+        return boardObjects.stream()
+                .filter(obj -> obj.getX() == x && obj.getY() == y)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<BoardObject> getObjects(int x, int y) {
+        if (!isWithinBounds(x, y)) {
+            throw new IllegalArgumentException("Position out of bounds: (" + x + ", " + y + ")");
+        }
+        List<BoardObject> objectsAtPosition = new ArrayList<>();
+        for (BoardObject obj : boardObjects) {
+            if (obj.getX() == x && obj.getY() == y) {
+                objectsAtPosition.add(obj);
+            }
+        }
+        return objectsAtPosition;
     }
 
     public boolean isWithinBounds(int x, int y) {
@@ -52,11 +98,8 @@ public class GameBoard implements Serializable {
     public void displayBoard() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (board[i][j] == null) {
-                    System.out.print(". "); // Use '.' for empty spaces
-                } else {
-                    System.out.print(board[i][j].toString() + " ");
-                }
+                BoardObject obj = getObjectAt(i, j);
+                System.out.print((obj == null ? "." : obj.toString()) + " ");
             }
             System.out.println();
         }
@@ -66,10 +109,11 @@ public class GameBoard implements Serializable {
         int cellnum = 0;
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (board[i][j] == null) {
+                BoardObject obj = getObjectAt(i, j);
+                if (obj == null) {
                     System.out.print(String.format("%-3d", cellnum));
                 } else {
-                    System.out.print(" " + board[i][j].toString() + " ");
+                    System.out.print(" " + obj.toString() + " ");
                 }
                 cellnum++;
             }
