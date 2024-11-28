@@ -9,11 +9,6 @@ public class Wall extends BoardObject implements Serializable {
     }
 
     @Override
-    public String getImgPath() {
-        return "/images/wall.png";
-    }
-
-    @Override
     public String toString() {
         return "W";
     }

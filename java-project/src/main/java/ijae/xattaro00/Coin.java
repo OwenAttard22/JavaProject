@@ -7,12 +7,7 @@ public class Coin extends BoardObject implements Serializable {
     public Coin(int x, int y) {
         super(x, y, Type.COIN);
     }
-
-    @Override
-    public String getImgPath() {
-        return "/images/coin.png";
-    }
-
+    
     @Override
     public String toString() {
         return "C";

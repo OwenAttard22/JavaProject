@@ -9,11 +9,6 @@ public class Key extends BoardObject implements Serializable {
     }
 
     @Override
-    public String getImgPath() {
-        return "/images/key.png";
-    }
-
-    @Override
     public String toString() {
         return "K";
     }

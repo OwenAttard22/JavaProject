@@ -11,11 +11,6 @@ public class Gate extends BoardObject implements Serializable {
     }
 
     @Override
-    public String getImgPath() {
-        return "/images/closedgate.png";
-    }
-
-    @Override
     public String toString() {
         return "G";
     }

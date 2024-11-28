@@ -12,12 +12,7 @@ public class Enemy extends Character implements Serializable {
     public void validateMove(Move move) {
         
     }
-
-    @Override
-    public String getImgPath() {
-        return "/images/greenshirt.png";
-    }
-
+    
     @Override
     public String toString() {
         return "E";

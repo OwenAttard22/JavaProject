@@ -14,11 +14,6 @@ public class Player extends Character implements Serializable {
     }
 
     @Override
-    public String getImgPath() {
-        return "/images/blueshirt.png";
-    }
-
-    @Override
     public String toString() {
         return "P";
     }
